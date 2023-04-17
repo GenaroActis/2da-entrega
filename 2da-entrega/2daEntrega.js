@@ -33,6 +33,22 @@ class ProductManager {
     generateId() {
         return ++this.newId;
     }
+    async upDateProduct(id, upDateKey, upDateValue){
+        try{
+            if(upDateKey === 'name' || upDateKey === 'price' || upDateKey === 'description' || upDateKey === 'thumbnail' || upDateKey === 'code' || upDateKey === 'stock'){
+                let productsFile = await this.getProducts();
+                let productFind = await this.findProductById(id, this.getProducts());
+                productsFile = productsFile.filter((product) => product.id !== id);
+                productFind[upDateKey] = upDateValue
+                productsFile.push(productFind)
+                await fs.promises.writeFile(this.pathProducts, JSON.stringify(productsFile));
+            }else{
+                console.log('Error: upDateKey debe ser una propieda valida');
+            }
+        }catch (error){
+            console.log(error);
+        }    
+    }
     // cart functions
 
     async getCart(){
@@ -61,11 +77,12 @@ class ProductManager {
             let productFindCart = await this.findProductById(id, this.getCart());
             if(productFindCart === null){
                 productFindAdded.amount = 1
+                productFindAdded.unitPrice = productFindAdded.price
                 productsCart.push(productFindAdded)
             } else{
                 productsCart = productsCart.filter((product) => product.id !== id);
                 productFindCart.amount ++;
-                productFindCart.price = productFindCart.price * productFindCart.amount
+                productFindCart.price = productFindCart.unitPrice * productFindCart.amount
                 productsCart.push(productFindCart)
             }
             await fs.promises.writeFile(this.pathCart, JSON.stringify(productsCart));
@@ -82,7 +99,7 @@ class ProductManager {
             } else{
                 productsCart = productsCart.filter((product) => product.id !== id);
                 productFind.amount = productFind.amount-1 
-                productFind.price = productFind.price * productFind.amount
+                productFind.price = productFind.unitPrice * productFind.amount
                 productsCart.push(productFind)
             }
             await fs.promises.writeFile(this.pathCart, JSON.stringify(productsCart));
@@ -106,7 +123,7 @@ class ProductManager {
 const manager = new ProductManager();
 
 const product1 = {
-    nombre:"Gorra",
+    name:"Gorra",
     description:"Polo RL",
     price:5000,
     thumbnail:"https://res.cloudinary.com/dsdicaf5h/image/upload/v1678451446/cenicero/54_vpuz2h.png",
@@ -114,7 +131,7 @@ const product1 = {
     stock: 3,
 }
 const product2 = {
-    nombre:"Chomba",
+    name:"Chomba",
     description:"Nike Golf",
     price:7000,
     thumbnail:"https://res.cloudinary.com/dsdicaf5h/image/upload/v1678451438/cenicero/94_ea9ghh.png",
@@ -122,7 +139,7 @@ const product2 = {
     stock: 4,
 }
 const product3 = {
-    nombre:"Chomba",
+    name:"Chomba",
     description:"Chaps RL",
     price:7000,
     thumbnail:"https://res.cloudinary.com/dsdicaf5h/image/upload/v1678451430/cenicero/131_extbeh.png",
@@ -135,20 +152,21 @@ const test = async() => {
     await manager.createProducts(product1);
     await manager.createProducts(product2);
     await manager.createProducts(product3);
+    await manager.upDateProduct(3, "price", 9000);
     const get2 = await manager.getProducts();
     console.log('segunda consulta productos', get2);
     const get3 = await manager.getCart();
-    console.log('tercera consulta carrito', get3)
-    await manager.addProductToCart(3);
-    await manager.addProductToCart(3);
-    await manager.addProductToCart(3);
+    console.log('tercera consulta carrito', get3);
     await manager.addProductToCart(2);
+    await manager.addProductToCart(3);
+    await manager.addProductToCart(3);
+    await manager.addProductToCart(3);
     const get4 = await manager.getCart();
-    console.log('cuarta consulta carrito',get4)
+    console.log('cuarta consulta carrito',get4);
     await manager.deleteProduct(3);
     await manager.deleteProduct(2);
     const get5 = await manager.getCart();
-    console.log('quinta consulta carrito',get5)
+    console.log('quinta consulta carrito',get5);
 }
 test();
 
