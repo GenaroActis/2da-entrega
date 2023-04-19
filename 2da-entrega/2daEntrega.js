@@ -22,12 +22,25 @@ class ProductManager {
     async createProducts(product){
         try{
             const productsFile = await this.getProducts();
-            product.id = this.generateId(),
-            product.amount = 0
-            productsFile.push(product);
-            await fs.promises.writeFile(this.pathProducts, JSON.stringify(productsFile));
+            let findCode = await this.repeatedCode(product.code, productsFile)
+            if(findCode){
+                console.log("ya existe un producto con este code")
+            }else{
+                product.id = this.generateId(),
+                product.amount = 0
+                productsFile.push(product);
+                await fs.promises.writeFile(this.pathProducts, JSON.stringify(productsFile));
+            }
         } catch (error){
             console.log(error);
+        }
+    }
+    async repeatedCode(code, productsFile){
+        try{
+            const findCode = productsFile.find((prodIterated) => prodIterated.code === code);
+            return findCode
+        }catch(error){
+            console.log(error)
         }
     }
     generateId() {
@@ -130,6 +143,14 @@ const product1 = {
     code: "2812023GPRLBE",
     stock: 3,
 }
+const product4 = {
+    name:"Gorra",
+    description:"Polo RL",
+    price:5000,
+    thumbnail:"https://res.cloudinary.com/dsdicaf5h/image/upload/v1678451446/cenicero/54_vpuz2h.png",
+    code: "2812023GPRLBE",
+    stock: 3,
+}
 const product2 = {
     name:"Chomba",
     description:"Nike Golf",
@@ -152,6 +173,7 @@ const test = async() => {
     await manager.createProducts(product1);
     await manager.createProducts(product2);
     await manager.createProducts(product3);
+    await manager.createProducts(product4);
     await manager.upDateProduct(3, "price", 9000);
     const get2 = await manager.getProducts();
     console.log('segunda consulta productos', get2);
