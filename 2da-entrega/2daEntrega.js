@@ -174,6 +174,8 @@ const test = async() => {
     await manager.createProducts(product2);
     await manager.createProducts(product3);
     await manager.createProducts(product4);
+    const findProduct = await manager.findProductById(2, manager.getProducts())
+    console.log("findId :", findProduct)
     await manager.upDateProduct(3, "price", 9000);
     const get2 = await manager.getProducts();
     console.log('segunda consulta productos', get2);
